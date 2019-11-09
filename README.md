@@ -17,7 +17,7 @@ Steps to test the application:
 1. Open the solution named: HackerNews.sln
 2. Build the application in Release mode
 3. Open a command prompt: press win+r then type ```cmd```
-4. Go to the folder: ```.\hackernews\bin\Release\netcoreapp3.0\``` from the solution folder.
+4. Go to the folder: ```.\bin\Release\netcoreapp3.0\``` from the solution folder.
 5. run the command: ```hackernews.exe --posts 20```
 6. See the result in the screen
 
