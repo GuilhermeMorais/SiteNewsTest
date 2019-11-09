@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -17,7 +18,7 @@ namespace HackerNews.Services
 
         public NewsApiService()
         {
-            this.httpClient = new HttpClient();
+            httpClient = new HttpClient();
         }
 
         /// <summary>
@@ -26,19 +27,13 @@ namespace HackerNews.Services
         /// <returns>List of Ids from Hacker news.</returns>
         public async Task<List<int>> GetBestPostsIdsAsync()
         {
-            var responseMessage = await httpClient.GetAsync(bestPostsUrl);
-            var result = new List<int>();
-            if (responseMessage.IsSuccessStatusCode)
+            var message = await GetBodyMessageAsync(bestPostsUrl);
+            if (string.IsNullOrWhiteSpace(message))
             {
-                var message = await responseMessage.Content.ReadAsStringAsync();
-                if (string.IsNullOrWhiteSpace(message))
-                {
-                    return result;
-                }
-
-                result = JsonSerializer.Deserialize<List<int>>(message);
+                return new List<int>();
             }
 
+            var result = JsonSerializer.Deserialize<List<int>>(message);
             return result;
         }
         
@@ -49,19 +44,32 @@ namespace HackerNews.Services
         /// <returns>DTO with the minimal necessary information</returns>
         public async Task<PostDto> GetStoryAsync(int id)
         {
-            var responseMessage = await httpClient.GetAsync(string.Format(storyDetailUrl, id));
-            if (responseMessage.IsSuccessStatusCode)
+            var message = await GetBodyMessageAsync(string.Format(storyDetailUrl, id));
+            if (string.IsNullOrWhiteSpace(message))
             {
-                var message = await responseMessage.Content.ReadAsStringAsync();
-                if (string.IsNullOrWhiteSpace(message))
-                {
-                    return null;
-                }
-
-                return JsonSerializer.Deserialize<PostDto>(message);
+                return null;
             }
 
-            return null;
+            var result = JsonSerializer.Deserialize<PostDto>(message);
+            return result;
+        }
+
+        private async Task<string> GetBodyMessageAsync(string url)
+        {
+            try
+            {
+                var responseMessage = await httpClient.GetAsync(url);
+                if (responseMessage.IsSuccessStatusCode)
+                {
+                    return await responseMessage.Content.ReadAsStringAsync();
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"Problem with the request to {url} => {ex.GetBaseException().Message}");
+            }
+
+            return string.Empty;
         }
     }
 }
