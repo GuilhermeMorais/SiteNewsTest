@@ -1,8 +1,10 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using HackerNews.Managers;
+using Microsoft.Extensions.Configuration;
 
 namespace HackerNews
 {
@@ -24,7 +26,8 @@ namespace HackerNews
                 return (int)ExitCodeEnum.InvalidParameters;
             }
 
-            var manager = new NewsManager();
+            var configurations = BuildSettingsConfigurations();
+            var manager = new NewsManager(configurations);
             var result = await manager.GetTopStoriesAsync(qtdPosts);
 
             if (result != null && result.Any())
@@ -36,6 +39,16 @@ namespace HackerNews
 
             Console.WriteLine("Unexpected behaviour");
             return (int) ExitCodeEnum.InternalError;
+        }
+
+        public static IConfiguration BuildSettingsConfigurations()
+        {
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appSettings.json")
+                .AddEnvironmentVariables()
+                .Build();
+            return builder;
         }
     }
 }

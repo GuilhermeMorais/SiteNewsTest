@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using HackerNews.Extensions;
 using HackerNews.Models;
 using HackerNews.Services;
+using Microsoft.Extensions.Configuration;
 
 namespace HackerNews.Managers
 {
@@ -15,10 +16,12 @@ namespace HackerNews.Managers
     public class NewsManager
     {
         private readonly NewsApiService apiService;
+        private readonly int qtdOfParallelsToServer;
 
-        public NewsManager()
+        public NewsManager(IConfiguration configurations)
         {
-            apiService = new NewsApiService();
+            apiService = new NewsApiService(configurations);
+            qtdOfParallelsToServer = int.Parse(configurations["MaxParallelCallsToApi"] ?? "10");
         }
 
         /// <summary>
@@ -51,7 +54,7 @@ namespace HackerNews.Managers
                 position += qtdItems;
 
                 posts.AsParallel()
-                     .WithDegreeOfParallelism(10)
+                     .WithDegreeOfParallelism(qtdOfParallelsToServer)
                      .ForAll(x => GetPost(x, bag));
             }
             

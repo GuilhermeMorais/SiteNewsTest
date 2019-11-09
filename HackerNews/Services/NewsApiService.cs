@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using HackerNews.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace HackerNews.Services
 {
@@ -13,12 +14,14 @@ namespace HackerNews.Services
     public class NewsApiService
     {
         private readonly HttpClient httpClient;
-        private readonly string bestPostsUrl = "https://hacker-news.firebaseio.com/v0/beststories.json?print=pretty";
-        private readonly string storyDetailUrl = "https://hacker-news.firebaseio.com/v0/item/{0}.json?print=pretty";
+        private readonly string bestPostsUrl;
+        private readonly string storyDetailUrl;
 
-        public NewsApiService()
+        public NewsApiService(IConfiguration configurations)
         {
             httpClient = new HttpClient();
+            bestPostsUrl = configurations["BestPostsUrl"];
+            storyDetailUrl = configurations["StoryDetailUrl"];
         }
 
         /// <summary>
