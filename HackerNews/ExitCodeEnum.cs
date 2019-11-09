@@ -3,6 +3,7 @@
     public enum ExitCodeEnum
     {
         Success,
-        InvalidParameters
+        InvalidParameters,
+        InternalError
     }
 }

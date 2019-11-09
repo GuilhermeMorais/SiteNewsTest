@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Linq;
+using System.Text.Json;
+using System.Threading.Tasks;
+using HackerNews.Managers;
 
 namespace HackerNews
 {
     class Program
     {
-        static int Main(string[] args)
+        static async Task<int> Main(string[] args)
         {
             if (args.Length != 2
                 || !args[0].Equals("--posts", StringComparison.InvariantCultureIgnoreCase)
@@ -20,8 +24,18 @@ namespace HackerNews
                 return (int)ExitCodeEnum.InvalidParameters;
             }
 
+            var manager = new NewsManager();
+            var result = await manager.GetTopStoriesAsync(qtdPosts);
 
-            return (int) ExitCodeEnum.Success;
+            if (result != null && result.Any())
+            {
+                var str = JsonSerializer.Serialize(result, new JsonSerializerOptions {WriteIndented = true});
+                Console.WriteLine(str);
+                return (int) ExitCodeEnum.Success;
+            }
+
+            Console.WriteLine("Unexpected behaviour");
+            return (int) ExitCodeEnum.InternalError;
         }
     }
 }
